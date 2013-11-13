@@ -35,14 +35,28 @@ INCLUDE_DIRECTORIES(
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/CMSIS/Include/
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/inc/
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32_USB-FS-Device_Driver/inc/
+  ${CMAKE_CURRENT_SOURCE_DIR}/cc3000-host-driver
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 SET(PROJECT_SOURCES
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
+  ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+
+  cc3000-host-driver/cc3000_common.c
+  cc3000-host-driver/hci.c
+  cc3000-host-driver/nvmem.c
+  cc3000-host-driver/socket.c
+  cc3000-host-driver/evnt_handler.c
+  cc3000-host-driver/netapp.c
+  cc3000-host-driver/security.c
+  cc3000-host-driver/wlan.c
+
   system_stm32f10x.c
+  stm32_cc3000.c
   main.c
+  debug.c
   interrupts.c
 )
 
