@@ -4,6 +4,7 @@
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_exti.h>
+#include <stm32f10x_spi.h>
 #include <stm32f10x_misc.h>
 
 #include "cc3000-host-driver/wlan.h"
@@ -181,10 +182,30 @@ void cc3000_setup_spi() {
   GPIO_Init(CC3000_CS_PORT, &gpioConfig);
   cc3000_spi_deassert();
 
-  SPI.begin();
-  SPI.setDataMode(SPI_MODE1);
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setClockDivider(g_SPIspeed);
+  RCC_PCLK2Config(RCC_HCLK_Div2);
+
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
+
+  // Configure SPI1 pins: SCK (pin 5) and MOSI (pin 7)
+  gpioConfig.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7;
+  gpioConfig.GPIO_Speed = GPIO_Speed_50MHz;
+  gpioConfig.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &gpioConfig);
+
+  // Configure SPI1 pins: MISO (pin 6)
+  gpioConfig.GPIO_Pin = GPIO_Pin_6;
+  gpioConfig.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(GPIOA, &gpioConfig);
+
+  SPI_InitTypeDef spiConfig;
+  SPI_StructInit(&spiConfig);
+  spiConfig.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+  spiConfig.SPI_Mode = SPI_Mode_Master;
+  spiConfig.SPI_DataSize = SPI_DataSize_8b;
+  spiConfig.SPI_NSS = SPI_NSS_Soft;
+  spiConfig.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+  spiConfig.SPI_FirstBit = SPI_FirstBit_MSB;
+  SPI_Init(SPI1, &spiConfig);
 }
 
 int cc3000_get_firmware_version(uint8_t *major, uint8_t *minor) {
