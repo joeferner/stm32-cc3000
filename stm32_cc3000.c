@@ -168,13 +168,7 @@ void cc3000_setup_irq() {
   extiConfig.EXTI_LineCmd = ENABLE;
   EXTI_Init(&extiConfig);
 
-  // Enable and set EXTI Interrupt to the lowest priority
-  NVIC_InitTypeDef nvicConfig;
-  nvicConfig.NVIC_IRQChannel = CC3000_IRQ_EXTI_CH;
-  nvicConfig.NVIC_IRQChannelPreemptionPriority = 0x0F;
-  nvicConfig.NVIC_IRQChannelSubPriority = 0x0F;
-  nvicConfig.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&nvicConfig);
+  cc3000_wlan_irq_enable();
 }
 
 void cc3000_setup_spi() {
@@ -262,21 +256,33 @@ char* cc3000_send_bootloader_patch(unsigned long *length) {
 }
 
 long cc3000_read_wlan_irq() {
-  return (digitalRead(g_irqPin));
+  return GPIO_ReadInputDataBit(CC3000_IRQ_PORT, CC3000_IRQ_PIN) == Bit_SET ? 1 : 0;
 }
 
 void cc3000_wlan_irq_enable() {
   debug_write_line("cc3000_wlan_irq_enable");
   // delay_ms(100);
   cc3000_spi_irq_enabled = 1;
-  attachInterrupt(g_IRQnum, SPI_IRQ, FALLING);
+
+  NVIC_InitTypeDef nvicConfig;
+  nvicConfig.NVIC_IRQChannel = CC3000_IRQ_EXTI_CH;
+  nvicConfig.NVIC_IRQChannelPreemptionPriority = 0x0F;
+  nvicConfig.NVIC_IRQChannelSubPriority = 0x0F;
+  nvicConfig.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&nvicConfig);
 }
 
 void cc3000_wlan_irq_disable() {
   debug_write_line("cc3000_wlan_irq_disable");
   // delay_ms(100);
   cc3000_spi_irq_enabled = 0;
-  detachInterrupt(g_IRQnum);
+
+  NVIC_InitTypeDef nvicConfig;
+  nvicConfig.NVIC_IRQChannel = CC3000_IRQ_EXTI_CH;
+  nvicConfig.NVIC_IRQChannelPreemptionPriority = 0x0F;
+  nvicConfig.NVIC_IRQChannelSubPriority = 0x0F;
+  nvicConfig.NVIC_IRQChannelCmd = DISABLE;
+  NVIC_Init(&nvicConfig);
 }
 
 void cc3000_write_wlan_pin(unsigned char val) {
@@ -288,12 +294,13 @@ void cc3000_write_wlan_pin(unsigned char val) {
 }
 
 void cc3000_irq_poll() {
-  if (digitalRead(g_irqPin) == LOW && cc3000_spi_is_in_irq == 0 && cc3000_spi_irq_enabled != 0) {
+  if (cc3000_read_wlan_irq() == 0 && cc3000_spi_is_in_irq == 0 && cc3000_spi_irq_enabled != 0) {
     cc3000_irq();
   }
 }
 
 void cc3000_irq() {
+  debug_led_set(1);
   zzz;
 }
 

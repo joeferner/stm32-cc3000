@@ -6,6 +6,10 @@
 extern "C" {
 #endif
 
+#define DEBUG_LED_RCC          RCC_APB2Periph_GPIOA
+#define DEBUG_LED_PORT         GPIOA
+#define DEBUG_LED_PIN          GPIO_Pin_0
+
 #define DEBUG_USART            USART1
 #define DEBUG_USART_BAUD       9600
 #define DEBUG_USART_IRQ        USART1_IRQn

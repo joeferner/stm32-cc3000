@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
   void debug_setup();
+  void debug_led_set(int v);
   void debug_write_line(const char* str);
   void debug_write_bytes(const uint8_t *data, uint16_t len);
   void debug_write(const char* str);

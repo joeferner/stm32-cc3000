@@ -11,6 +11,12 @@ void debug_setup() {
   GPIO_InitTypeDef gpioInitStructure;
   NVIC_InitTypeDef nvicInitStructure;
 
+  RCC_APB2PeriphClockCmd(DEBUG_LED_RCC, ENABLE);
+  gpioInitStructure.GPIO_Pin = DEBUG_LED_PIN;
+  gpioInitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  gpioInitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(DEBUG_LED_PORT, &gpioInitStructure);
+
   /* Enable the USART1 Interrupt */
   nvicInitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
   nvicInitStructure.NVIC_IRQChannelPreemptionPriority = 3;
@@ -48,6 +54,14 @@ void debug_setup() {
   /* Enable the USART interrupts */
   USART_ITConfig(DEBUG_USART, USART_IT_RXNE, ENABLE);
   USART_ITConfig(DEBUG_USART, USART_IT_TXE, DISABLE);
+}
+
+void debug_led_set(int v) {
+  if (v) {
+    GPIO_SetBits(DEBUG_LED_PORT, DEBUG_LED_PIN);
+  } else {
+    GPIO_ResetBits(DEBUG_LED_PORT, DEBUG_LED_PIN);
+  }
 }
 
 /* !!! Interrupt handler - Don't change this function name !!! */

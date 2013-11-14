@@ -3,6 +3,7 @@
 #include <stm32f10x_rcc.h>
 #include "stm32_cc3000.h"
 #include "debug.h"
+#include "platform_config.h"
 
 void setup();
 void loop();
