@@ -43,6 +43,8 @@ SET(PROJECT_SOURCES
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
   ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+  ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.c
+  ${STM32_USB_FS_DEVICE_LIB_DIR}/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c
 
   cc3000-host-driver/cc3000_common.c
   cc3000-host-driver/hci.c
@@ -57,6 +59,7 @@ SET(PROJECT_SOURCES
   stm32_cc3000.c
   main.c
   debug.c
+  delay.c
   interrupts.c
 )
 

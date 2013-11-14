@@ -83,6 +83,15 @@ void debug_write_ch(char ch) {
   while (USART_GetFlagStatus(DEBUG_USART, USART_FLAG_TXE) == RESET);
 }
 
+void debug_write_u8(uint8_t val, uint8_t base) {
+  if (base == 16) {
+    debug_write_ch(TO_HEX(val >> 4));
+    debug_write_ch(TO_HEX(val >> 0));
+  } else {
+    debug_write("NOT IMPLEMENTED");
+  }
+}
+
 void debug_write_u16(uint8_t val, uint8_t base) {
   if (base == 16) {
     debug_write_ch(TO_HEX(val >> 12));
@@ -94,8 +103,14 @@ void debug_write_u16(uint8_t val, uint8_t base) {
   }
 }
 
-void debug_write_u8(uint8_t val, uint8_t base) {
+void debug_write_u32(uint8_t val, uint8_t base) {
   if (base == 16) {
+    debug_write_ch(TO_HEX(val >> 28));
+    debug_write_ch(TO_HEX(val >> 24));
+    debug_write_ch(TO_HEX(val >> 20));
+    debug_write_ch(TO_HEX(val >> 16));
+    debug_write_ch(TO_HEX(val >> 12));
+    debug_write_ch(TO_HEX(val >> 8));
     debug_write_ch(TO_HEX(val >> 4));
     debug_write_ch(TO_HEX(val >> 0));
   } else {

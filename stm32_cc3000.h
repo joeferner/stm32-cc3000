@@ -8,8 +8,9 @@
 extern "C" {
 #endif
 
-void cc3000_setup();
-uint16_t cc3000_get_firmware_version();
+  int cc3000_setup(int patchesAvailableAtHost, int useSmartConfigData);
+  int cc3000_get_firmware_version(uint8_t *major, uint8_t *minor);
+  void cc3000_irq();
 
 #ifdef	__cplusplus
 }

@@ -15,6 +15,22 @@ extern "C" {
 #define DEBUG_USART_RX         GPIOA
 #define DEBUG_USART_RX_PIN     GPIO_Pin_10
 
+#define CC3000_IRQ_RCC         RCC_APB2Periph_GPIOA
+#define CC3000_IRQ_PORT        GPIOA
+#define CC3000_IRQ_PIN         GPIO_Pin_1
+#define CC3000_IRQ_EXTI_LINE   EXTI_Line1
+#define CC3000_IRQ_EXTI_PORT   GPIO_PortSourceGPIOA
+#define CC3000_IRQ_EXTI_PIN    GPIO_PinSource1
+#define CC3000_IRQ_EXTI_CH     EXTI1_IRQn
+
+#define CC3000_VBAT_EN_RCC     RCC_APB2Periph_GPIOA
+#define CC3000_VBAT_EN_PORT    GPIOA
+#define CC3000_VBAT_EN_PIN     GPIO_Pin_2
+
+#define CC3000_CS_RCC          RCC_APB2Periph_GPIOA
+#define CC3000_CS_PORT         GPIOA
+#define CC3000_CS_PIN          GPIO_Pin_3
+
 #ifdef	__cplusplus
 }
 #endif
