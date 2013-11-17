@@ -1,6 +1,7 @@
 
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_rcc.h>
+#include <stm32f10x_exti.h>
 #include "stm32_cc3000.h"
 #include "debug.h"
 #include "platform_config.h"
@@ -22,8 +23,7 @@ void setup() {
 
   debug_setup();
 
-  debug_write_line("cc3000_setup");
-  cc3000_setup();
+  cc3000_setup(0, 0);
 
   cc3000_get_firmware_version(&cc3000MajorFirmwareVersion, &cc3000MinorFirmwareVersion);
   debug_write("major: ");
@@ -32,6 +32,10 @@ void setup() {
   debug_write("minor: ");
   debug_write_u8(cc3000MinorFirmwareVersion, 16);
   debug_write_line("");
+  if (cc3000MajorFirmwareVersion != 0x01 || cc3000MinorFirmwareVersion != 0x18) {
+    debug_write_line("Wrong firmware version!");
+    while (1);
+  }
 }
 
 void loop() {

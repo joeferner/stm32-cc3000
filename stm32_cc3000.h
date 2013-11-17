@@ -12,6 +12,8 @@ extern "C" {
   int cc3000_get_firmware_version(uint8_t *major, uint8_t *minor);
   void cc3000_irq();
 
+  typedef void (*cc3000_spi_rx_handler_t)(void *p);
+
 #ifdef	__cplusplus
 }
 #endif
