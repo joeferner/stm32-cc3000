@@ -490,6 +490,7 @@ void cc3000_spi_write_data_sync(unsigned char *data, unsigned short size) {
 }
 
 void cc3000_irq() {
+  delay_us(10);
   //  debug_write_line("cc3000_irq");
   //  debug_led_set(1);
   cc3000_spi_is_in_irq = 1;
@@ -654,4 +655,9 @@ int cc3000_spi_first_write(unsigned char *ucBuf, unsigned short usLength) {
   cc3000_spi_deassert();
 
   return (0);
+}
+
+int cc3000_get_mac_address(uint8_t *addr) {
+  debug_write_line("cc3000_get_mac_address");
+  return nvmem_read(NVMEM_MAC_FILEID, 6, 0, addr);
 }

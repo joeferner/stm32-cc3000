@@ -9,6 +9,7 @@
 void setup();
 void loop();
 void assert_failed(uint8_t* file, uint32_t line);
+void display_mac_address();
 
 int main(void) {
   setup();
@@ -36,9 +37,23 @@ void setup() {
     debug_write_line("Wrong firmware version!");
     while (1);
   }
+
+  display_mac_address();
 }
 
 void loop() {
+}
+
+void display_mac_address() {
+  uint8_t macAddress[20];
+
+  if (cc3000_get_mac_address(macAddress) != 0) {
+    debug_write_line("Unable to retrieve MAC Address!");
+  } else {
+    debug_write("MAC Address: ");
+    debug_write_u8_array(macAddress, 6);
+    debug_write_line("");
+  }
 }
 
 void debug_on_rx(uint8_t* data, uint16_t len) {
