@@ -18,10 +18,6 @@
 #include "delay.h"
 #include "platform_config.h"
 
-#define WLAN_CONNECT_TIMEOUT_MS 10000
-#define MAX_SOCKETS             32
-char cc3000_device_name[] = "CC3000";
-
 // NOTE: Required by cc3000 Host driver
 unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
 
@@ -84,6 +80,9 @@ void cc3000_wlan_irq_enable();
 void cc3000_wlan_irq_disable();
 void cc3000_write_wlan_pin(unsigned char val);
 void cc3000_irq_poll();
+int cc3000_scan_ssids(uint32_t time);
+int cc3000_connect_open(const char *ssid);
+int cc3000_connect_secure(const char *ssid, const char *key, int32_t secMode);
 
 void cc3000_spi_assert();
 void cc3000_spi_deassert();
@@ -660,4 +659,136 @@ int cc3000_spi_first_write(unsigned char *ucBuf, unsigned short usLength) {
 int cc3000_get_mac_address(uint8_t *addr) {
   debug_write_line("cc3000_get_mac_address");
   return nvmem_read(NVMEM_MAC_FILEID, 6, 0, addr);
+}
+
+int cc3000_delete_profiles() {
+  if (wlan_ioctl_set_connection_policy(0, 0, 0) != 0) {
+    debug_write_line("deleteProfiles connection failure");
+    return 1;
+  }
+
+  if (wlan_ioctl_del_profile(255) != 0) {
+    debug_write_line("Failed deleting profiles");
+    return 2;
+  }
+
+  return 0;
+}
+
+int cc3000_connect_to_ap(const char *ssid, const char *key, uint8_t secmode) {
+  int16_t timer;
+
+  do {
+    cc3000_irq_poll();
+
+    // Setup a 4 second SSID scan
+    cc3000_scan_ssids(4000);
+
+    // Wait for results
+    delay_ms(4500);
+
+    cc3000_scan_ssids(0);
+
+    // Attempt to connect to an access point
+    if ((secmode == 0) || (strlen(key) == 0)) {
+      // Connect to an unsecured network
+      if (cc3000_connect_open(ssid) != 0) {
+        debug_write_line("Fail!");
+        continue;
+      }
+    } else {
+      // NOTE: Secure connections are not available in 'Tiny' mode!
+#ifndef CC3000_TINY_DRIVER
+      // Connect to a secure network using WPA2, etc
+      if (cc3000_connect_secure(ssid, key, secmode) != 0) {
+        debug_write_line("Fail!");
+        continue;
+      }
+#endif
+    }
+
+    timer = WLAN_CONNECT_TIMEOUT_MS;
+
+    // Wait around a bit for the async connected signal to arrive or timeout
+    debug_write_line("Waiting to connect...");
+    while ((timer > 0) && !cc3000_connected) {
+      cc3000_irq_poll();
+      delay_ms(10);
+      timer -= 10;
+    }
+    if (timer <= 0) {
+      debug_write_line("Timed out!");
+    }
+  } while (!cc3000_connected);
+
+  return 0;
+}
+
+int cc3000_scan_ssids(uint32_t time) {
+  const unsigned long intervalTime[16] = {
+    2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000,
+    2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000
+  };
+
+  // We can abort a scan with a time of 0
+  if (time) {
+    debug_write_line("Started AP/SSID scan");
+  }
+
+  return wlan_ioctl_set_scan_params(time, 20, 100, 5, 0x7FF, -120, 0, 300, (unsigned long *) &intervalTime);
+}
+
+int cc3000_connect_open(const char *ssid) {
+#ifndef CC3000_TINY_DRIVER
+  if (wlan_ioctl_set_connection_policy(0, 0, 0) != 0) {
+    debug_write_line("Failed to set connection policy");
+    return 1;
+  }
+  delay_ms(500);
+  if (wlan_connect(WLAN_SEC_UNSEC, (char*) ssid, strlen(ssid), 0, NULL, 0) != 0) {
+    debug_write_line("SSID connection failed");
+    return 2;
+  }
+  return 0;
+
+#else
+  return wlan_connect(ssid, ssidLen);
+#endif  
+}
+
+int cc3000_connect_secure(const char *ssid, const char *key, int32_t secMode) {
+  if ((secMode < 0) || (secMode > 3)) {
+    debug_write_line("Security mode must be between 0 and 3");
+    return 1;
+  }
+
+  if (strlen(ssid) > MAXSSID) {
+    debug_write("SSID length must be < ");
+    debug_write_u16(MAXSSID, 10);
+    debug_write_line("");
+    return 2;
+  }
+
+  if (strlen(key) > MAXLENGTHKEY) {
+    debug_write("Key length must be < ");
+    debug_write_u16(MAXLENGTHKEY, 10);
+    debug_write_line("");
+    return 3;
+  }
+
+  if (wlan_ioctl_set_connection_policy(0, 0, 0) != 0) {
+    debug_write_line("Failed setting the connection policy");
+    return 4;
+  }
+
+  delay_ms(500);
+
+  if (wlan_connect(secMode, (char *) ssid, strlen(ssid), NULL, (unsigned char *) key, strlen(key)) != 0) {
+    debug_write_line("SSID connection failed");
+    return 5;
+  }
+
+  // Wait for 'HCI_EVNT_WLAN_UNSOL_CONNECT' in CC3000_UsynchCallback
+
+  return 0;
 }

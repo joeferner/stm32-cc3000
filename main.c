@@ -6,6 +6,13 @@
 #include "debug.h"
 #include "platform_config.h"
 
+#define WLAN_SSID      "testap"
+#define WLAN_PASS      "test"
+// Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
+#define WLAN_SECURITY  WLAN_SEC_UNSEC
+
+char cc3000_device_name[] = "CC3000";
+
 void setup();
 void loop();
 void assert_failed(uint8_t* file, uint32_t line);
@@ -39,6 +46,25 @@ void setup() {
   }
 
   display_mac_address();
+
+  debug_write_line("Deleting old connection profiles");
+  if (cc3000_delete_profiles() != 0) {
+    debug_write_line("Failed!");
+    while (1);
+  }
+
+  // Attempt to connect to an access point
+  char *ssid = WLAN_SSID; /* Max 32 chars */
+  debug_write("Attempting to connect to ");
+  debug_write_line(ssid);
+
+  // NOTE: Secure connections are not available in 'Tiny' mode!
+  if (cc3000_connect_to_ap(WLAN_SSID, WLAN_PASS, WLAN_SECURITY) != 0) {
+    debug_write_line("Connect Failed!");
+    while (1);
+  }
+
+  debug_write_line("Connected!");
 }
 
 void loop() {
