@@ -821,3 +821,7 @@ int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway,
 
   return 0;
 }
+
+int cc3000_is_socket_closed(uint32_t sock) {
+  return cc3000_closed_sockets[sock];
+}
