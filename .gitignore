@@ -7,4 +7,4 @@ build/
 *-swp
 nbproject/
 .idea/
-
+connection_info.h

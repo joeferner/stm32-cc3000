@@ -154,9 +154,9 @@ typedef long int __fd_mask;
     for (__i = 0; __i < sizeof (fd_set) / sizeof (__fd_mask); ++__i) \
       __FDS_BITS (__arr)[__i] = 0;                    \
   } while (0)
-#define __FD_SET(d, set)       (__FDS_BITS (set)[__FDELT (d)] |= __FDMASK (d))
-#define __FD_CLR(d, set)       (__FDS_BITS (set)[__FDELT (d)] &= ~__FDMASK (d))
-#define __FD_ISSET(d, set)     (__FDS_BITS (set)[__FDELT (d)] & __FDMASK (d))
+//#define __FD_SET(d, set)       (__FDS_BITS (set)[__FDELT (d)] |= __FDMASK (d))
+//#define __FD_CLR(d, set)       (__FDS_BITS (set)[__FDELT (d)] &= ~__FDMASK (d))
+//#define __FD_ISSET(d, set)     (__FDS_BITS (set)[__FDELT (d)] & __FDMASK (d))
 
 // Access macros for 'fd_set'.
 #define FD_SET(fd, fdsetp)      __FD_SET (fd, fdsetp)
