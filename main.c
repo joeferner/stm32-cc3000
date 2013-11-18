@@ -5,6 +5,7 @@
 #include "stm32_cc3000.h"
 #include "debug.h"
 #include "platform_config.h"
+#include "delay.h"
 
 #define WLAN_SSID      "testap"
 #define WLAN_PASS      "test"
@@ -65,6 +66,37 @@ void setup() {
   }
 
   debug_write_line("Connected!");
+
+  // Wait for DHCP to complete
+  debug_write_line("Request DHCP");
+  while (cc3000_check_dhcp() != 0) {
+    delay_ms(100);
+  }
+
+  // Display the IP address DNS, Gateway, etc.
+  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
+  while (cc3000_get_ip_address(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv) != 0) {
+    delay_ms(1000);
+  }
+  debug_write("IP Addr: ");
+  debug_write_ip_le(ipAddress);
+  debug_write_line("");
+
+  debug_write("Netmask: ");
+  debug_write_ip_le(netmask);
+  debug_write_line("");
+
+  debug_write("Gateway: ");
+  debug_write_ip_le(gateway);
+  debug_write_line("");
+
+  debug_write("DHCPsrv: ");
+  debug_write_ip_le(dhcpserv);
+  debug_write_line("");
+
+  debug_write("DNSserv: ");
+  debug_write_ip_le(dnsserv);
+  debug_write_line("");
 }
 
 void loop() {

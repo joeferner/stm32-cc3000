@@ -6,6 +6,8 @@
 
 #define TO_HEX(i) ( (((i) & 0xf) <= 9) ? ('0' + ((i) & 0xf)) : ('A' - 10 + ((i) & 0xf)) )
 
+char* itoa(int value, char* result, int base);
+
 void debug_setup() {
   USART_InitTypeDef usartInitStructure;
   GPIO_InitTypeDef gpioInitStructure;
@@ -102,7 +104,9 @@ void debug_write_u8(uint8_t val, uint8_t base) {
     debug_write_ch(TO_HEX(val >> 4));
     debug_write_ch(TO_HEX(val >> 0));
   } else {
-    debug_write("NOT IMPLEMENTED");
+    char buffer[20];
+    itoa(val, buffer, base);
+    debug_write(buffer);
   }
 }
 
@@ -113,7 +117,9 @@ void debug_write_u16(uint8_t val, uint8_t base) {
     debug_write_ch(TO_HEX(val >> 4));
     debug_write_ch(TO_HEX(val >> 0));
   } else {
-    debug_write("NOT IMPLEMENTED");
+    char buffer[20];
+    itoa(val, buffer, base);
+    debug_write(buffer);
   }
 }
 
@@ -128,7 +134,9 @@ void debug_write_u32(uint8_t val, uint8_t base) {
     debug_write_ch(TO_HEX(val >> 4));
     debug_write_ch(TO_HEX(val >> 0));
   } else {
-    debug_write("NOT IMPLEMENTED");
+    char buffer[20];
+    itoa(val, buffer, base);
+    debug_write(buffer);
   }
 }
 
@@ -137,4 +145,41 @@ void debug_write_u8_array(uint8_t *p, int len) {
     debug_write_u8(p[i], 16);
     debug_write_ch(' ');
   }
+}
+
+void debug_write_ip_le(uint32_t ip) {
+  debug_write_u8(ip >> 24, 10);
+  debug_write_ch('.');
+  debug_write_u8(ip >> 16, 10);
+  debug_write_ch('.');
+  debug_write_u8(ip >> 8, 10);
+  debug_write_ch('.');
+  debug_write_u8(ip >> 0, 10);
+}
+
+char* itoa(int value, char* result, int base) {
+  // check that the base if valid
+  if (base < 2 || base > 36) {
+    *result = '\0';
+    return result;
+  }
+
+  char* ptr = result, *ptr1 = result, tmp_char;
+  int tmp_value;
+
+  do {
+    tmp_value = value;
+    value /= base;
+    *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+  } while (value);
+
+  // Apply negative sign
+  if (tmp_value < 0) *ptr++ = '-';
+  *ptr-- = '\0';
+  while (ptr1 < ptr) {
+    tmp_char = *ptr;
+    *ptr-- = *ptr1;
+    *ptr1++ = tmp_char;
+  }
+  return result;
 }

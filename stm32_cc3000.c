@@ -792,3 +792,32 @@ int cc3000_connect_secure(const char *ssid, const char *key, int32_t secMode) {
 
   return 0;
 }
+
+int cc3000_check_dhcp() {
+  return cc3000_dhcp == 0 ? 1 : 0;
+}
+
+int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway, uint32_t *dhcpserv, uint32_t *dnsserv) {
+  if (!cc3000_connected) {
+    return 1;
+  }
+  if (!cc3000_dhcp) {
+    return 2;
+  }
+
+  tNetappIpconfigRetArgs ipconfig;
+  netapp_ipconfig(&ipconfig);
+
+  /* If byte 1 is 0 we don't have a valid address */
+  if (ipconfig.aucIP[3] == 0) {
+    return 3;
+  }
+
+  memcpy(retip, ipconfig.aucIP, 4);
+  memcpy(netmask, ipconfig.aucIP + 4, 4);
+  memcpy(gateway, ipconfig.aucIP + 8, 4);
+  memcpy(dhcpserv, ipconfig.aucIP + 12, 4);
+  memcpy(dnsserv, ipconfig.aucIP + 16, 4);
+
+  return 0;
+}

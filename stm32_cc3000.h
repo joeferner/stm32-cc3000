@@ -21,6 +21,8 @@ extern "C" {
   void cc3000_irq();
   int cc3000_delete_profiles();
   int cc3000_connect_to_ap(const char *ssid, const char *key, uint8_t secmode);
+  int cc3000_check_dhcp();
+  int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway, uint32_t *dhcpserv, uint32_t *dnsserv);
 
   typedef void (*cc3000_spi_rx_handler_t)(void *p);
 
