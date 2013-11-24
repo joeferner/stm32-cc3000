@@ -9,6 +9,7 @@
 #include "platform_config.h"
 #include "delay.h"
 #include "connection_info.h"
+#include "time.h"
 
 #define NTP_SERVER     "pool.ntp.org"
 
@@ -41,10 +42,10 @@ void setup() {
   cc3000_setup(0, 0);
 
   cc3000_get_firmware_version(&cc3000MajorFirmwareVersion, &cc3000MinorFirmwareVersion);
-  debug_write("major: ");
+  debug_write("major: 0x");
   debug_write_u8(cc3000MajorFirmwareVersion, 16);
   debug_write_line("");
-  debug_write("minor: ");
+  debug_write("minor: 0x");
   debug_write_u8(cc3000MinorFirmwareVersion, 16);
   debug_write_line("");
   if (cc3000MajorFirmwareVersion != 0x01 || cc3000MinorFirmwareVersion != 0x18) {
@@ -54,11 +55,11 @@ void setup() {
 
   display_mac_address();
 
-  //  debug_write_line("Deleting old connection profiles");
-  //  if (cc3000_delete_profiles() != 0) {
-  //    debug_write_line("Failed!");
-  //    while (1);
-  //  }
+  debug_write_line("Deleting old connection profiles");
+  if (cc3000_delete_profiles() != 0) {
+    debug_write_line("Failed!");
+    while (1);
+  }
 
   // Attempt to connect to an access point
   char *ssid = WLAN_SSID; /* Max 32 chars */
@@ -142,7 +143,7 @@ void assert_failed(uint8_t* file, uint32_t line) {
   debug_write("assert_failed: file ");
   debug_write((const char*) file);
   debug_write(" on line ");
-  debug_write_u32(line, 16); // TODO change to base 10
+  debug_write_u32(line, 10);
   debug_write_line("");
 
   /* Infinite loop */
@@ -196,7 +197,7 @@ uint32_t query_time_server() {
   result = gethostbyname(NTP_SERVER, strlen(NTP_SERVER), &ip);
   if (result < 0) {
     debug_write("Could not get host by name: " NTP_SERVER " (");
-    debug_write_u32(result, 10);
+    debug_write_i32(result, 10);
     debug_write_line(")");
     return 0;
   }
@@ -225,7 +226,7 @@ uint32_t query_time_server() {
   ntp_packet.transmit_timestamp.seconds = 0xc50204ec;
   int r = send(client, (uint8_t*) & ntp_packet, sizeof (ntp_packet), 0);
   debug_write("sent: ");
-  debug_write_u16(r, 10);
+  debug_write_i32(r, 10);
   debug_write_line("bytes");
 
   debug_write_line("Awaiting response...");
@@ -233,7 +234,7 @@ uint32_t query_time_server() {
 
   r = recv(client, (uint8_t*) & ntp_packet, sizeof (ntp_packet), 0);
   debug_write("recv: ");
-  debug_write_u16(r, 10);
+  debug_write_i32(r, 10);
   debug_write_line("bytes");
 
   debug_write_u8_array((uint8_t*) & ntp_packet, sizeof (ntp_packet));

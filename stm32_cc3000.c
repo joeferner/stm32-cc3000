@@ -764,14 +764,14 @@ int cc3000_connect_secure(const char *ssid, const char *key, int32_t secMode) {
 
   if (strlen(ssid) > MAXSSID) {
     debug_write("SSID length must be < ");
-    debug_write_u16(MAXSSID, 10);
+    debug_write_i32(MAXSSID, 10);
     debug_write_line("");
     return 2;
   }
 
   if (strlen(key) > MAXLENGTHKEY) {
     debug_write("Key length must be < ");
-    debug_write_u16(MAXLENGTHKEY, 10);
+    debug_write_i32(MAXLENGTHKEY, 10);
     debug_write_line("");
     return 3;
   }

@@ -141,6 +141,12 @@ void debug_write_u32(uint32_t val, uint8_t base) {
   }
 }
 
+void debug_write_i32(int32_t val, uint8_t base) {
+  char buffer[20];
+  itoa(val, buffer, base);
+  debug_write(buffer);
+}
+
 void debug_write_u8_array(uint8_t *p, int len) {
   for (int i = 0; i < len; i++) {
     debug_write_u8(p[i], 16);
