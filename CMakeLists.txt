@@ -63,6 +63,8 @@ SET(PROJECT_SOURCES
   delay.c
   interrupts.c
   time.c
+  ntp.c
+  util.c
 )
 
 ADD_EXECUTABLE(${CMAKE_PROJECT_NAME}.elf ${PROJECT_SOURCES} ${CMSIS_STARTUP_SOURCE})

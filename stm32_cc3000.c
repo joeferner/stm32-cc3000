@@ -823,6 +823,107 @@ int cc3000_is_socket_closed(uint32_t sock) {
   return cc3000_closed_sockets[sock];
 }
 
+int16_t connect_udp(uint32_t destIP, uint16_t destPort) {
+  sockaddr socketAddress;
+  int16_t udpSocket;
+
+  // Create the socket(s)
+  // socket   = SOCK_STREAM, SOCK_DGRAM, or SOCK_RAW 
+  // protocol = IPPROTO_TCP, IPPROTO_UDP or IPPROTO_RAW
+  udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+  if (udpSocket == -1) {
+    debug_write_line("Failed to open socket");
+    return -1;
+  }
+
+  // Try to open the socket
+  memset(&socketAddress, 0x00, sizeof (socketAddress));
+  socketAddress.sa_family = AF_INET;
+  socketAddress.sa_data[0] = (destPort & 0xFF00) >> 8; // Set the Port Number
+  socketAddress.sa_data[1] = (destPort & 0x00FF);
+  socketAddress.sa_data[2] = destIP >> 24;
+  socketAddress.sa_data[3] = destIP >> 16;
+  socketAddress.sa_data[4] = destIP >> 8;
+  socketAddress.sa_data[5] = destIP;
+
+  debug_write("Connect to ");
+  debug_write_ip(destIP);
+  debug_write_ch(':');
+  debug_write_u16(destPort, 10);
+  debug_write_line("");
+
+  if (connect(udpSocket, &socketAddress, sizeof (socketAddress)) != 0) {
+    debug_write_line("Connection error");
+    closesocket(udpSocket);
+    return -1;
+  }
+
+  return udpSocket;
+}
+
+int available(int16_t socket) {
+  // not open!
+  if (socket < 0) {
+    return 0;
+  }
+
+  // do a select() call on this socket
+  timeval timeout;
+  fd_set fd_read;
+
+  memset(&fd_read, 0, sizeof (fd_read));
+  FD_SET(socket, &fd_read);
+
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 5000; // 5 millisec
+
+  int s = select(socket + 1, &fd_read, NULL, NULL, &timeout);
+  if (s == 1) {
+    return 1; // some data is available to read
+  } else {
+    return 0; // no data is available
+  }
+}
+
 uint32_t iptol(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
   return d << 24 | c << 16 | b << 8 | a;
+}
+
+void cc3000_display_mac_address() {
+  uint8_t macAddress[20];
+
+  if (cc3000_get_mac_address(macAddress) != 0) {
+    debug_write_line("Unable to retrieve MAC Address!");
+  } else {
+    debug_write("MAC Address: ");
+    debug_write_u8_array(macAddress, 6);
+    debug_write_line("");
+  }
+}
+
+void cc3000_display_ifconfig() {
+  // Display the IP address DNS, Gateway, etc.
+  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
+  while (cc3000_get_ip_address(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv) != 0) {
+    delay_ms(1000);
+  }
+  debug_write("IP Addr: ");
+  debug_write_ip(ipAddress);
+  debug_write_line("");
+
+  debug_write("Netmask: ");
+  debug_write_ip(netmask);
+  debug_write_line("");
+
+  debug_write("Gateway: ");
+  debug_write_ip(gateway);
+  debug_write_line("");
+
+  debug_write("DHCPsrv: ");
+  debug_write_ip(dhcpserv);
+  debug_write_line("");
+
+  debug_write("DNSserv: ");
+  debug_write_ip(dnsserv);
+  debug_write_line("");
 }
