@@ -12,6 +12,8 @@
 #include "time.h"
 #include "ntp.h"
 
+#define NTP_QUERY_FREQUENCY (30 * 1000)
+
 char cc3000_device_name[] = "CC3000";
 
 void setup();
@@ -19,6 +21,8 @@ void loop();
 void assert_failed(uint8_t* file, uint32_t line);
 
 int countdown = 0;
+uint32_t lastNtpQuery;
+tNtpQuery ntpQuery;
 
 int main(void) {
   setup();
@@ -96,28 +100,30 @@ void setup() {
   }
 #endif
 
-  while(!cc3000_is_connected()) {
+  while (!cc3000_is_connected()) {
     delay_ms(100);
   }
-  
+
   cc3000_display_ipconfig();
+
+  ntp_query_init(&ntpQuery, NTP_SERVER, 10000);
+  lastNtpQuery = time_ms();
 }
 
 void loop() {
-  if (countdown == 0) {
-    uint32_t t = ntp_query_time_server();
-    if (t) { // Success?
-      debug_write("Current UNIX time: ");
-      debug_write_u32(t, 10);
-      debug_write_line(" (seconds since 1/1/1970 UTC)");
-
-      countdown = 1;
-    }
-  } else {
-    countdown--;
+  if (time_ms() - lastNtpQuery > NTP_QUERY_FREQUENCY) {
+    ntp_query_close(&ntpQuery);
+    ntp_query_init(&ntpQuery, NTP_SERVER, 10000);
+    lastNtpQuery = time_ms();
   }
 
-  delay_ms(15000);
+  if (ntp_query_loop(&ntpQuery) == NTP_QUERY_RESULT_OK) {
+    ntp_query_close(&ntpQuery);
+
+    debug_write("Current UNIX time: ");
+    debug_write_u32(ntpQuery.time, 10);
+    debug_write_line(" (seconds since 1/1/1970 UTC)");
+  }
 }
 
 void debug_on_rx(uint8_t* data, uint16_t len) {
