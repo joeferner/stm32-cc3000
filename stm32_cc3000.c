@@ -17,6 +17,7 @@
 #include "debug.h"
 #include "delay.h"
 #include "platform_config.h"
+#include "spi.h"
 
 // NOTE: Required by cc3000 Host driver
 unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
@@ -45,7 +46,7 @@ typedef enum {
 } spi_state_t;
 
 typedef struct {
-  cc3000_spi_rx_handler_t spi_rx_handler;
+  spi_rx_handler_t spi_rx_handler;
   unsigned short tx_packet_length;
   unsigned short rx_packet_length;
   spi_state_t state;
@@ -536,7 +537,7 @@ uint8_t cc3000_spi_transfer(uint8_t d) {
 /**
  * NOTE: Required by cc3000 Host driver
  */
-void SpiOpen(cc3000_spi_rx_handler_t rx_handler) {
+void SpiOpen(spi_rx_handler_t rx_handler) {
   debug_write_line("SpiOpen");
 
   cc3000_spi_info.state = SPI_STATE_POWERUP;
@@ -562,7 +563,14 @@ void SpiOpen(cc3000_spi_rx_handler_t rx_handler) {
 /**
  * NOTE: Required by cc3000 Host driver
  */
-void SpiResumeSpi(void) {
+void SpiClose() {
+  debug_write_line("TODO SpiClose"); // TODO SpiClose
+}
+
+/**
+ * NOTE: Required by cc3000 Host driver
+ */
+void SpiResumeSpi() {
   cc3000_wlan_irq_enable();
 }
 
@@ -797,28 +805,6 @@ int cc3000_check_dhcp() {
   return cc3000_dhcp == 0 ? 1 : 0;
 }
 
-int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway, uint32_t *dhcpserv, uint32_t *dnsserv) {
-  if (!cc3000_connected) {
-    return 1;
-  }
-
-  tNetappIpconfigRetArgs ipconfig;
-  netapp_ipconfig(&ipconfig);
-
-  /* If byte 1 is 0 we don't have a valid address */
-  if (ipconfig.aucIP[3] == 0) {
-    return 3;
-  }
-
-  memcpy(retip, ipconfig.aucIP, 4);
-  memcpy(netmask, ipconfig.aucIP + 4, 4);
-  memcpy(gateway, ipconfig.aucIP + 8, 4);
-  memcpy(dhcpserv, ipconfig.aucIP + 12, 4);
-  memcpy(dnsserv, ipconfig.aucIP + 16, 4);
-
-  return 0;
-}
-
 int cc3000_is_socket_closed(uint32_t sock) {
   return cc3000_closed_sockets[sock];
 }
@@ -901,29 +887,82 @@ void cc3000_display_mac_address() {
   }
 }
 
-void cc3000_display_ifconfig() {
+volatile int cc3000_is_connected() {
+  return cc3000_connected;
+}
+
+int cc3000_display_ipconfig() {
+  tNetappIpconfigRetArgs ipconfig;
+
   // Display the IP address DNS, Gateway, etc.
-  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
-  while (cc3000_get_ip_address(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv) != 0) {
-    delay_ms(1000);
+  netapp_ipconfig(&ipconfig);
+
+  if (ipconfig.aucIP[3] == 0) {
+    debug_write_line("no valid IP addresses");
+    return 1;
   }
-  debug_write("IP Addr: ");
-  debug_write_ip(ipAddress);
+
+  debug_write("IP: ");
+  debug_write_ip(u8iparraytol(ipconfig.aucIP));
   debug_write_line("");
 
-  debug_write("Netmask: ");
-  debug_write_ip(netmask);
+  debug_write("Subnet Mask: ");
+  debug_write_ip(u8iparraytol(ipconfig.aucSubnetMask));
   debug_write_line("");
 
   debug_write("Gateway: ");
-  debug_write_ip(gateway);
+  debug_write_ip(u8iparraytol(ipconfig.aucDefaultGateway));
   debug_write_line("");
 
   debug_write("DHCPsrv: ");
-  debug_write_ip(dhcpserv);
+  debug_write_ip(u8iparraytol(ipconfig.aucDHCPServer));
   debug_write_line("");
 
   debug_write("DNSserv: ");
-  debug_write_ip(dnsserv);
+  debug_write_ip(u8iparraytol(ipconfig.aucDNSServer));
   debug_write_line("");
+
+  debug_write("MAC: ");
+  debug_write_mac(ipconfig.uaMacAddr);
+  debug_write_line("");
+
+  debug_write("SSID: ");
+  debug_write_ssid(ipconfig.uaSSID);
+  debug_write_line("");
+
+  return 0;
+}
+
+uint32_t u8iparraytol(uint8_t* a) {
+  uint32_t l;
+  memcpy(&l, a, 4);
+  return l;
+}
+
+void debug_write_ip(uint32_t ip) {
+  debug_write_u8(ip >> 24, 10);
+  debug_write_ch('.');
+  debug_write_u8(ip >> 16, 10);
+  debug_write_ch('.');
+  debug_write_u8(ip >> 8, 10);
+  debug_write_ch('.');
+  debug_write_u8(ip >> 0, 10);
+}
+
+void debug_write_mac(uint8_t* mac) {
+  for (int i = 0; i < 6; i++) {
+    if (i > 0) {
+      debug_write_ch(':');
+    }
+    debug_write_u8(mac[i], 16);
+  }
+}
+
+void debug_write_ssid(uint8_t* ssid) {
+  for (int i = 0; i < 32; i++) {
+    if (i > 0) {
+      debug_write_ch(':');
+    }
+    debug_write_u8(ssid[i], 16);
+  }
 }

@@ -6,8 +6,7 @@
 extern "C" {
 #endif
 
-
-
+uint32_t ntp_query_time_server();
 
 #ifdef	__cplusplus
 }

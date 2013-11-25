@@ -3,6 +3,8 @@
 
 #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
 
+extern void assert_failed(uint8_t* file, uint32_t line);
+
 /* Uncomment/Comment the line below to enable/disable peripheral header file inclusion */
 
 // #include "stm32f10x_adc.h"

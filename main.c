@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_rcc.h>
-#include <stm32f10x_exti.h>
 #include "cc3000-host-driver/socket.h"
 #include "cc3000-host-driver/netapp.h"
 #include "stm32_cc3000.h"
@@ -11,13 +10,13 @@
 #include "delay.h"
 #include "connection_info.h"
 #include "time.h"
+#include "ntp.h"
 
 char cc3000_device_name[] = "CC3000";
 
 void setup();
 void loop();
 void assert_failed(uint8_t* file, uint32_t line);
-uint32_t query_time_server();
 
 int countdown = 0;
 
@@ -97,12 +96,16 @@ void setup() {
   }
 #endif
 
-  cc3000_display_ifconfig();
+  while(!cc3000_is_connected()) {
+    delay_ms(100);
+  }
+  
+  cc3000_display_ipconfig();
 }
 
 void loop() {
   if (countdown == 0) {
-    uint32_t t = query_time_server();
+    uint32_t t = ntp_query_time_server();
     if (t) { // Success?
       debug_write("Current UNIX time: ");
       debug_write_u32(t, 10);
@@ -130,13 +133,5 @@ void assert_failed(uint8_t* file, uint32_t line) {
 
   /* Infinite loop */
   while (1) {
-  }
-}
-
-/* !!! Interrupt handler - Don't change this function name !!! */
-void EXTI1_IRQHandler(void) {
-  if (EXTI_GetITStatus(CC3000_IRQ_EXTI_LINE) != RESET) {
-    cc3000_irq();
-    EXTI_ClearITPendingBit(CC3000_IRQ_EXTI_LINE);
   }
 }

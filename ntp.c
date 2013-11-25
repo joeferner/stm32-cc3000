@@ -33,7 +33,7 @@ typedef struct {
   ntp_time_t transmit_timestamp;
 } ntp_packet_t;
 
-uint32_t query_time_server() {
+uint32_t ntp_query_time_server() {
   ntp_packet_t ntp_packet;
   uint32_t ip;
   int16_t client;

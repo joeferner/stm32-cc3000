@@ -35,6 +35,7 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
+#include "cc3000_common.h"
 
 //*****************************************************************************
 //
@@ -99,7 +100,9 @@ extern "C" {
 
 #define  IOCTL_SOCKET_EVENTMASK
 
+#ifndef ENOBUFS
 #define ENOBUFS                 55          // No buffer space available
+#endif
 
 #define __FD_SETSIZE            32
 
@@ -159,10 +162,18 @@ typedef long int __fd_mask;
 //#define __FD_ISSET(d, set)     (__FDS_BITS (set)[__FDELT (d)] & __FDMASK (d))
 
 // Access macros for 'fd_set'.
+#ifndef FD_SET
 #define FD_SET(fd, fdsetp)      __FD_SET (fd, fdsetp)
+#endif
+#ifndef FD_CLR
 #define FD_CLR(fd, fdsetp)      __FD_CLR (fd, fdsetp)
+#endif
+#ifndef FD_ISSET
 #define FD_ISSET(fd, fdsetp)    __FD_ISSET (fd, fdsetp)
+#endif
+#ifndef FD_ZERO
 #define FD_ZERO(fdsetp)         __FD_ZERO (fdsetp)
+#endif
 
 //Use in case of Big Endian only
   

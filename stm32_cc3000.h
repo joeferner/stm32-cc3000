@@ -22,16 +22,19 @@ extern "C" {
   int cc3000_delete_profiles();
   int cc3000_connect_to_ap(const char *ssid, const char *key, uint8_t secmode);
   int cc3000_check_dhcp();
-  int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway, uint32_t *dhcpserv, uint32_t *dnsserv);
   int cc3000_is_socket_closed(uint32_t sock);
   void cc3000_display_mac_address();
-  void cc3000_display_ifconfig();
+  int cc3000_display_ipconfig();
+  volatile int cc3000_is_connected();
 
+  void debug_write_ip(uint32_t ip);
+  void debug_write_mac(uint8_t* mac);
+  void debug_write_ssid(uint8_t* ssid);
+
+  uint32_t u8iparraytol(uint8_t* a);
   uint32_t iptol(uint8_t a, uint8_t b, uint8_t c, uint8_t d);
   int16_t connect_udp(uint32_t destIP, uint16_t destPort);
   int available(int16_t socket);
-
-  typedef void (*cc3000_spi_rx_handler_t)(void *p);
 
 #ifdef	__cplusplus
 }

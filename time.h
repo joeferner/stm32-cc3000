@@ -7,8 +7,9 @@
 extern "C" {
 #endif
 
-void time_config();
+void time_setup();
 volatile uint32_t time_ms();
+void time_SysTick_Handler();
 
 #ifdef	__cplusplus
 }

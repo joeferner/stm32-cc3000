@@ -5,12 +5,11 @@
 
 volatile uint32_t counter_ms = 0;
 
-/* !!! Interrupt handler - Don't change this function name !!! */
-void SysTick_Handler(void) {
+void time_SysTick_Handler() {
   counter_ms++;
 }
 
-void time_config() {
+void time_setup() {
   /*
    * Setup SysTick Timer for 1 msec interrupts.
    * ------------------------------------------

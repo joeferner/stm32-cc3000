@@ -67,15 +67,6 @@ void debug_led_set(int v) {
   }
 }
 
-/* !!! Interrupt handler - Don't change this function name !!! */
-void USART1_IRQHandler(void) {
-  if (USART_GetITStatus(DEBUG_USART, USART_IT_RXNE) != RESET) {
-    uint8_t b[1];
-    b[0] = USART_ReceiveData(DEBUG_USART);
-    debug_on_rx(b, 1);
-  }
-}
-
 void debug_write_line(const char* str) {
   debug_write(str);
   debug_write_ch('\n');
@@ -152,16 +143,6 @@ void debug_write_u8_array(uint8_t *p, int len) {
     debug_write_u8(p[i], 16);
     debug_write_ch(' ');
   }
-}
-
-void debug_write_ip(uint32_t ip) {
-  debug_write_u8(ip >> 24, 10);
-  debug_write_ch('.');
-  debug_write_u8(ip >> 16, 10);
-  debug_write_ch('.');
-  debug_write_u8(ip >> 8, 10);
-  debug_write_ch('.');
-  debug_write_u8(ip >> 0, 10);
 }
 
 char* itoa(int32_t value, char* result, int base) {
