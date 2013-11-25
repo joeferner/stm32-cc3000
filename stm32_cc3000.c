@@ -801,9 +801,6 @@ int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway,
   if (!cc3000_connected) {
     return 1;
   }
-  if (!cc3000_dhcp) {
-    return 2;
-  }
 
   tNetappIpconfigRetArgs ipconfig;
   netapp_ipconfig(&ipconfig);
@@ -824,4 +821,8 @@ int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway,
 
 int cc3000_is_socket_closed(uint32_t sock) {
   return cc3000_closed_sockets[sock];
+}
+
+uint32_t iptol(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+  return d << 24 | c << 16 | b << 8 | a;
 }

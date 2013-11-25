@@ -24,6 +24,7 @@ extern "C" {
   int cc3000_check_dhcp();
   int cc3000_get_ip_address(uint32_t *retip, uint32_t *netmask, uint32_t *gateway, uint32_t *dhcpserv, uint32_t *dnsserv);
   int cc3000_is_socket_closed(uint32_t sock);
+  uint32_t iptol(uint8_t a, uint8_t b, uint8_t c, uint8_t d);
   
   typedef void (*cc3000_spi_rx_handler_t)(void *p);
 

@@ -4,6 +4,7 @@
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_exti.h>
 #include "cc3000-host-driver/socket.h"
+#include "cc3000-host-driver/netapp.h"
 #include "stm32_cc3000.h"
 #include "debug.h"
 #include "platform_config.h"
@@ -61,6 +62,26 @@ void setup() {
     while (1);
   }
 
+#ifdef STATIC_IP_ADDRESS
+  unsigned long aucIP = STATIC_IP_ADDRESS;
+  unsigned long aucSubnetMask = STATIC_SUBNET_MASK;
+  unsigned long aucDefaultGateway = STATIC_DEFAULT_GATEWAY;
+  unsigned long aucDNSServer = STATIC_DNS_SERVER;
+  if (netapp_dhcp(&aucIP, &aucSubnetMask, &aucDefaultGateway, &aucDNSServer) != 0) {
+    debug_write_line("netapp_dhcp Failed!");
+    while (1);
+  }
+#else
+  unsigned long aucIP = 0;
+  unsigned long aucSubnetMask = 0;
+  unsigned long aucDefaultGateway = 0;
+  unsigned long aucDNSServer = 0;
+  if (netapp_dhcp(&aucIP, &aucSubnetMask, &aucDefaultGateway, &aucDNSServer) != 0) {
+    debug_write_line("netapp_dhcp Failed!");
+    while (1);
+  }
+#endif
+
   // Attempt to connect to an access point
   char *ssid = WLAN_SSID; /* Max 32 chars */
   debug_write("Attempting to connect to ");
@@ -74,11 +95,13 @@ void setup() {
 
   debug_write_line("Connected!");
 
+#ifndef STATIC_IP_ADDRESS
   // Wait for DHCP to complete
   debug_write_line("Request DHCP");
   while (cc3000_check_dhcp() != 0) {
     delay_ms(100);
   }
+#endif
 
   // Display the IP address DNS, Gateway, etc.
   uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
@@ -223,7 +246,7 @@ uint32_t query_time_server() {
   ntp_packet.poll_interval = 10;
   ntp_packet.precision = 0xfa;
   ntp_packet.root_dispersion = 0x00010290;
-  ntp_packet.transmit_timestamp.seconds = 0xc50204ec;
+  ntp_packet.transmit_timestamp.seconds = 0x35cb3dd6;
   int r = send(client, (uint8_t*) & ntp_packet, sizeof (ntp_packet), 0);
   debug_write("sent: ");
   debug_write_i32(r, 10);
