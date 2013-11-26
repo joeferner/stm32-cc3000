@@ -12,7 +12,7 @@
 #include "time.h"
 #include "ntp.h"
 
-#define NTP_QUERY_FREQUENCY (30 * 1000)
+#define NTP_QUERY_FREQUENCY (10 * 60 * 1000)
 
 char cc3000_device_name[] = "CC3000";
 
@@ -35,6 +35,7 @@ int main(void) {
 void setup() {
   uint8_t cc3000MajorFirmwareVersion, cc3000MinorFirmwareVersion;
 
+  time_setup();
   debug_setup();
 
   cc3000_setup(0, 0);
@@ -111,7 +112,7 @@ void setup() {
 }
 
 void loop() {
-  if (time_ms() - lastNtpQuery > NTP_QUERY_FREQUENCY) {
+  if ((time_ms() - lastNtpQuery) > NTP_QUERY_FREQUENCY) {
     ntp_query_close(&ntpQuery);
     ntp_query_init(&ntpQuery, NTP_SERVER, 10000);
     lastNtpQuery = time_ms();

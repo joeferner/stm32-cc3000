@@ -950,8 +950,8 @@ void debug_write_ip(uint32_t ip) {
 }
 
 void debug_write_mac(uint8_t* mac) {
-  for (int i = 0; i < 6; i++) {
-    if (i > 0) {
+  for (int i = 5; i >= 0; i--) {
+    if (i < 5) {
       debug_write_ch(':');
     }
     debug_write_u8(mac[i], 16);
@@ -960,9 +960,9 @@ void debug_write_mac(uint8_t* mac) {
 
 void debug_write_ssid(uint8_t* ssid) {
   for (int i = 0; i < 32; i++) {
-    if (i > 0) {
-      debug_write_ch(':');
+    if (ssid[i] == 0) {
+      break;
     }
-    debug_write_u8(ssid[i], 16);
+    debug_write_ch(ssid[i]);
   }
 }

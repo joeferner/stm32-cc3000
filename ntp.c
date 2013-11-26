@@ -115,7 +115,7 @@ tNtpQueryResult ntp_query_loop(tNtpQuery* query) {
         debug_write_line("bad socket");
         return NTP_QUERY_RESULT_ERROR_BAD_SOCKET;
       }
-
+      
       if (available(query->socket) > 0) {
         memset((uint8_t*) & ntp_packet, 0, sizeof (ntp_packet));
         r = recv(query->socket, (uint8_t*) & ntp_packet, sizeof (ntp_packet), 0);
@@ -140,7 +140,7 @@ tNtpQueryResult ntp_query_loop(tNtpQuery* query) {
         return NTP_QUERY_RESULT_OK;
       }
 
-      if (time_ms() - query->startTime > query->timeout) {
+      if ((time_ms() - query->startTime) > query->timeout) {
         ntp_query_close(query);
         query->state = NTP_QUERY_STATE_GET_HOST_BY_NAME;
         return NTP_QUERY_RESULT_ERROR_TIMEOUT;
