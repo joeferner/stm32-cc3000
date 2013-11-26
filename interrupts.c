@@ -1,6 +1,7 @@
 
 #include <stm32f10x_exti.h>
 #include <stm32f10x_usart.h>
+#include <stm32f10x_rtc.h>
 #include "time.h"
 #include "stm32_cc3000.h"
 #include "platform_config.h"
@@ -46,5 +47,13 @@ void USART1_IRQHandler(void) {
     uint8_t b[1];
     b[0] = USART_ReceiveData(DEBUG_USART);
     debug_on_rx(b, 1);
+  }
+}
+
+void RTC_IRQHandler(void) {
+  if (RTC_GetITStatus(RTC_IT_SEC) != RESET) {
+    RTC_ClearITPendingBit(RTC_IT_SEC);
+
+    RTC_WaitForLastTask();
   }
 }

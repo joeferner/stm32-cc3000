@@ -1,6 +1,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stm32f10x_rtc.h>
 #include "ntp.h"
 #include "connection_info.h"
 #include "debug.h"
@@ -14,6 +15,8 @@
 #define NTP_VERSION_3            0x18
 
 #define NTP_MODE_CLIENT          0x03
+
+#define SECONDS_FROM_1900_TO_1970 0x83AA7E80
 
 typedef struct {
   uint32_t seconds;
@@ -92,8 +95,8 @@ tNtpQueryResult ntp_query_loop(tNtpQuery* query) {
       ntp_packet.stratum = 0;
       ntp_packet.poll_interval = 10;
       ntp_packet.precision = 0xfa;
-      ntp_packet.root_dispersion = 0x00010290;
-      ntp_packet.transmit_timestamp.seconds = 0x35cb3dd6;
+      ntp_packet.root_dispersion = 0;
+      ntp_packet.transmit_timestamp.seconds = swap_endian(RTC_GetCounter() + SECONDS_FROM_1900_TO_1970);
       int r = send(query->socket, (uint8_t*) & ntp_packet, sizeof (ntp_packet), 0);
       if (r == -1) {
         debug_write_line("send error");
@@ -115,7 +118,7 @@ tNtpQueryResult ntp_query_loop(tNtpQuery* query) {
         debug_write_line("bad socket");
         return NTP_QUERY_RESULT_ERROR_BAD_SOCKET;
       }
-      
+
       if (available(query->socket) > 0) {
         memset((uint8_t*) & ntp_packet, 0, sizeof (ntp_packet));
         r = recv(query->socket, (uint8_t*) & ntp_packet, sizeof (ntp_packet), 0);
@@ -133,9 +136,9 @@ tNtpQueryResult ntp_query_loop(tNtpQuery* query) {
         debug_write_u8_array((uint8_t*) & ntp_packet, sizeof (ntp_packet));
         debug_write_line("");
 
-        uint32_t time = swap_endian(ntp_packet.reference_timestamp.seconds);
+        uint32_t time = swap_endian(ntp_packet.transmit_timestamp.seconds);
 
-        query->time = time - 0x83AA7E80; // the seconds from Jan 1, 1900 to Jan 1, 1970
+        query->time = time - SECONDS_FROM_1900_TO_1970; // the seconds from Jan 1, 1900 to Jan 1, 1970
         ntp_query_close(query);
         return NTP_QUERY_RESULT_OK;
       }
