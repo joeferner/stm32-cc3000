@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="stm32-cc3000" />
+		<Option pch_mode="2" />
+		<Option compiler="arm-elf-gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="build/bin/Debug/stm32-cc3000" prefix_auto="1" extension_auto="1" />
+				<Option object_output="build/obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="arm-elf-gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="build/bin/Release/stm32-cc3000" prefix_auto="1" extension_auto="1" />
+				<Option object_output="build/obj/Release/" />
+				<Option type="1" />
+				<Option compiler="arm-elf-gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="CMakeLists.txt" />
+		<Unit filename="README.md" />
+		<Unit filename="build.sh" />
+		<Unit filename="cc3000-host-driver/cc3000_common.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/cc3000_common.h" />
+		<Unit filename="cc3000-host-driver/evnt_handler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/evnt_handler.h" />
+		<Unit filename="cc3000-host-driver/hci.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/hci.h" />
+		<Unit filename="cc3000-host-driver/host_driver_version.h" />
+		<Unit filename="cc3000-host-driver/netapp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/netapp.h" />
+		<Unit filename="cc3000-host-driver/nvmem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/nvmem.h" />
+		<Unit filename="cc3000-host-driver/security.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/security.h" />
+		<Unit filename="cc3000-host-driver/socket.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/socket.h" />
+		<Unit filename="cc3000-host-driver/wlan.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cc3000-host-driver/wlan.h" />
+		<Unit filename="connection_info.h" />
+		<Unit filename="debug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug.h" />
+		<Unit filename="delay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="delay.h" />
+		<Unit filename="interrupts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ntp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ntp.h" />
+		<Unit filename="platform_config.h" />
+		<Unit filename="ring_buffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ring_buffer.h" />
+		<Unit filename="run-cmake.sh" />
+		<Unit filename="run-doxygen.sh" />
+		<Unit filename="spi.h" />
+		<Unit filename="stm32_cc3000.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stm32_cc3000.h" />
+		<Unit filename="stm32f10x_conf.h" />
+		<Unit filename="system_stm32f10x.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="time.h" />
+		<Unit filename="upload.sh" />
+		<Unit filename="util.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="util.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
