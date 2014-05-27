@@ -3,6 +3,14 @@
 *  socket.h  - CC3000 Host Driver Implementation.
 *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
 *
+* Adapted for use with the Arduino/AVR by KTOWN (Kevin Townsend) 
+* & Limor Fried for Adafruit Industries
+* This library works with the Adafruit CC3000 breakout 
+*	----> https://www.adafruit.com/products/1469
+* Adafruit invests time and resources providing this open source code,
+* please support Adafruit and open-source hardware by purchasing
+* products from Adafruit!
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
@@ -35,7 +43,6 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
-#include "cc3000_common.h"
 
 //*****************************************************************************
 //
@@ -95,14 +102,18 @@ extern "C" {
 #define  SOCK_ON                0			// socket non-blocking mode	is enabled		
 #define  SOCK_OFF               1			// socket blocking mode is enabled
 
+#define  TCP_NODELAY            0x0001
+#define  TCP_BSDURGENT          0x7000
+
 #define  MAX_PACKET_SIZE        1500
 #define  MAX_LISTEN_QUEUE       4
 
 #define  IOCTL_SOCKET_EVENTMASK
 
-#ifndef ENOBUFS
-#define ENOBUFS                 55          // No buffer space available
+#ifdef ENOBUFS
+#undef ENOBUFS
 #endif
+#define ENOBUFS                 55          // No buffer space available
 
 #define __FD_SETSIZE            32
 
@@ -140,13 +151,16 @@ typedef long int __fd_mask;
 #define __FDELT(d)              ((d) / __NFDBITS)
 #define __FDMASK(d)             ((__fd_mask) 1 << ((d) % __NFDBITS))
 
-#include <sys/types.h>
+#ifdef fd_set
+#undef fd_set  // for compatibility with newlib, which defines fd_set
+#endif
+
 // fd_set for select and pselect.
-//typedef struct
-//{
-//    __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
-//#define __FDS_BITS(set)        ((set)->fds_bits)
-//} fd_set;
+typedef struct
+{
+    __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
+#define __FDS_BITS(set)        ((set)->fds_bits)
+} fd_set;
 
 // We don't use `memset' because this would require a prototype and
 //   the array isn't too big.
@@ -157,23 +171,27 @@ typedef long int __fd_mask;
     for (__i = 0; __i < sizeof (fd_set) / sizeof (__fd_mask); ++__i) \
       __FDS_BITS (__arr)[__i] = 0;                    \
   } while (0)
-//#define __FD_SET(d, set)       (__FDS_BITS (set)[__FDELT (d)] |= __FDMASK (d))
-//#define __FD_CLR(d, set)       (__FDS_BITS (set)[__FDELT (d)] &= ~__FDMASK (d))
-//#define __FD_ISSET(d, set)     (__FDS_BITS (set)[__FDELT (d)] & __FDMASK (d))
+#define __FD_SET(d, set)       (__FDS_BITS (set)[__FDELT (d)] |= __FDMASK (d))
+#define __FD_CLR(d, set)       (__FDS_BITS (set)[__FDELT (d)] &= ~__FDMASK (d))
+#define __FD_ISSET(d, set)     (__FDS_BITS (set)[__FDELT (d)] & __FDMASK (d))
 
 // Access macros for 'fd_set'.
-#ifndef FD_SET
+#ifdef FD_SET
+#undef FD_SET
+#endif
+#ifdef FD_CLR
+#undef FD_CLR
+#endif
+#ifdef FD_ISSET
+#undef FD_ISSET
+#endif
+#ifdef FD_ZERO
+#undef FD_ZERO
+#endif
 #define FD_SET(fd, fdsetp)      __FD_SET (fd, fdsetp)
-#endif
-#ifndef FD_CLR
 #define FD_CLR(fd, fdsetp)      __FD_CLR (fd, fdsetp)
-#endif
-#ifndef FD_ISSET
 #define FD_ISSET(fd, fdsetp)    __FD_ISSET (fd, fdsetp)
-#endif
-#ifndef FD_ZERO
 #define FD_ZERO(fdsetp)         __FD_ZERO (fdsetp)
-#endif
 
 //Use in case of Big Endian only
   
@@ -355,7 +373,7 @@ extern long listen(long sd, long backlog);
 //
 //*****************************************************************************
 #ifndef CC3000_TINY_DRIVER 
-extern int gethostbyname(char * hostname, unsigned short usNameLen, unsigned long* out_ip_addr);
+extern int gethostbyname(const char * hostname, uint8_t usNameLen, uint32_t* out_ip_addr);
 #endif
 
 

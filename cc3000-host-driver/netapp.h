@@ -3,6 +3,14 @@
 *  netapp.h  - CC3000 Host Driver Implementation.
 *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
 *
+* Adapted for use with the Arduino/AVR by KTOWN (Kevin Townsend) 
+* & Limor Fried for Adafruit Industries
+* This library works with the Adafruit CC3000 breakout 
+*	----> https://www.adafruit.com/products/1469
+* Adafruit invests time and resources providing this open source code,
+* please support Adafruit and open-source hardware by purchasing
+* products from Adafruit!
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
@@ -206,7 +214,7 @@ extern long netapp_timeout_values(unsigned long *aucDHCP, unsigned long *aucARP,
 //*****************************************************************************
 
  #ifndef CC3000_TINY_DRIVER
-extern long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts, unsigned long ulPingSize, unsigned long ulPingTimeout);
+extern long netapp_ping_send(uint32_t *ip, uint32_t ulPingAttempts, uint32_t ulPingSize, uint32_t ulPingTimeout);
 #endif
 
 //*****************************************************************************

@@ -1,7 +1,17 @@
+#define SEND_TIMEOUT_MS (30 * 1000)
+
 /*****************************************************************************
 *
 *  socket.c  - CC3000 Host Driver Implementation.
 *  Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+*
+* Adapted for use with the Arduino/AVR by KTOWN (Kevin Townsend) 
+* & Limor Fried for Adafruit Industries
+* This library works with the Adafruit CC3000 breakout 
+*	----> https://www.adafruit.com/products/1469
+* Adafruit invests time and resources providing this open source code,
+* please support Adafruit and open-source hardware by purchasing
+* products from Adafruit!
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
@@ -47,6 +57,7 @@
 #include "socket.h"
 #include "evnt_handler.h"
 #include "netapp.h"
+#include "debug.h"
 
 
 
@@ -114,6 +125,11 @@ HostFlowControlConsumeBuff(int sd)
 {
 #ifndef SEND_NON_BLOCKING
 	/* wait in busy loop */
+
+#ifdef SEND_TIMEOUT_MS
+	unsigned long startTime = millis();
+#endif
+
 	do
 	{
 		// In case last transmission failed then we will return the last failure 
@@ -128,6 +144,14 @@ HostFlowControlConsumeBuff(int sd)
 		
 		if(SOCKET_STATUS_ACTIVE != get_socket_active_status(sd))
 			return -1;
+
+#ifdef SEND_TIMEOUT_MS
+		if ((millis() - startTime) > SEND_TIMEOUT_MS)
+		{
+			return -3; /* Timeout */
+		}
+#endif
+
 	} while(0 == tSLInformation.usNumberOfFreeBuffers);
 	
 	tSLInformation.usNumberOfFreeBuffers--;
@@ -239,8 +263,7 @@ closesocket(long sd)
 	args = UINT32_TO_STREAM(args, sd);
 	
 	// Initiate a HCI command
-	hci_command_send(HCI_CMND_CLOSE_SOCKET,
-									 ptr, SOCKET_CLOSE_PARAMS_LEN);
+	hci_command_send(HCI_CMND_CLOSE_SOCKET, ptr, SOCKET_CLOSE_PARAMS_LEN);
 	
 	// Since we are in blocking state - wait for event complete
 	SimpleLinkWaitEvent(HCI_CMND_CLOSE_SOCKET, &ret);
@@ -321,8 +344,8 @@ accept(long sd, sockaddr *addr, socklen_t *addrlen)
 	
 	
 	// need specify return parameters!!!
-	memcpy(addr, &tAcceptReturnArguments.tSocketAddress, ASIC_ADDR_LEN);
-	*addrlen = ASIC_ADDR_LEN;
+	if (addr) memcpy(addr, &tAcceptReturnArguments.tSocketAddress, ASIC_ADDR_LEN);
+	if (addrlen) *addrlen = ASIC_ADDR_LEN;
 	errno = tAcceptReturnArguments.iStatus; 
 	ret = errno;
 	
@@ -461,8 +484,7 @@ listen(long sd, long backlog)
 
 #ifndef CC3000_TINY_DRIVER
 int 
-gethostbyname(char * hostname, unsigned short usNameLen, 
-							unsigned long* out_ip_addr)
+gethostbyname(const char * hostname, uint8_t usNameLen, uint32_t * out_ip_addr)
 {
 	tBsdGethostbynameParams ret;
 	unsigned char *ptr, *args;
@@ -490,8 +512,8 @@ gethostbyname(char * hostname, unsigned short usNameLen,
 	SimpleLinkWaitEvent(HCI_EVNT_BSD_GETHOSTBYNAME, &ret);
 	
 	errno = ret.retVal;
-	
-	(*((long*)out_ip_addr)) = ret.outputAddress;
+	//Dprinter->print("errno: "); Dprinter->println(errno);
+	(*((uint32_t *)out_ip_addr)) = ret.outputAddress;
 	
 	return (errno);
 	
@@ -724,7 +746,7 @@ int
 setsockopt(long sd, long level, long optname, const void *optval,
 					 socklen_t optlen)
 {
-	int ret;
+	long ret;
 	unsigned char *ptr, *args;
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -752,7 +774,7 @@ setsockopt(long sd, long level, long optname, const void *optval,
 	else
 	{
 		errno = ret;
-		return ret;
+		return (-1);
 	}
 }
 #endif
@@ -834,7 +856,7 @@ getsockopt (long sd, long level, long optname, void *optval, socklen_t *optlen)
 	else
 	{
 		errno = tRetParams.iStatus;
-		return errno;
+		return (-1);
 	}
 }
 
@@ -873,22 +895,36 @@ simple_link_recv(long sd, void *buf, long len, long flags, sockaddr *from,
 	args = UINT32_TO_STREAM(args, sd);
 	args = UINT32_TO_STREAM(args, len);
 	args = UINT32_TO_STREAM(args, flags);
-	
+
 	// Generate the read command, and wait for the 
 	hci_command_send(opcode,  ptr, SOCKET_RECV_FROM_PARAMS_LEN);
 	
 	// Since we are in blocking state - wait for event complete
 	SimpleLinkWaitEvent(opcode, &tSocketReadEvent);
-	
+
+	DEBUGPRINT_F("\n\r\tRecv'd data... Socket #");
+	DEBUGPRINT_DEC(tSocketReadEvent.iSocketDescriptor);
+	DEBUGPRINT_F(" Bytes: 0x");
+	DEBUGPRINT_HEX(tSocketReadEvent.iNumberOfBytes);
+	DEBUGPRINT_F(" Flags: 0x");
+	DEBUGPRINT_HEX(tSocketReadEvent.uiFlags);
+	DEBUGPRINT_F("\n\r");
+
 	// In case the number of bytes is more then zero - read data
 	if (tSocketReadEvent.iNumberOfBytes > 0)
 	{
 		// Wait for the data in a synchronous way. Here we assume that the bug is 
 		// big enough to store also parameters of receive from too....
-		SimpleLinkWaitData(buf, (unsigned char *)from, (unsigned char *)fromlen);
+	  SimpleLinkWaitData((unsigned char *)buf, (unsigned char *)from, (unsigned char *)fromlen);
 	}
 	
 	errno = tSocketReadEvent.iNumberOfBytes;
+
+#if (DEBUG_MODE == 1)
+	for (uint8_t i=0; i<errno; i++) {
+	  uart_putchar(((unsigned char *)buf)[i]);
+	}
+#endif
 	
 	return(tSocketReadEvent.iNumberOfBytes);
 }
@@ -981,9 +1017,9 @@ int
 simple_link_send(long sd, const void *buf, long len, long flags,
               const sockaddr *to, long tolen, long opcode)
 {    
-	unsigned char uArgSize = 0,  addrlen;
-	unsigned char *ptr, *pDataPtr = NULL, *args;
-	unsigned long addr_offset = 0;
+	unsigned char uArgSize,  addrlen;
+	unsigned char *ptr, *pDataPtr, *args;
+	unsigned long addr_offset;
 	int res;
         tBsdReadReturnParams tSocketSendEvent;
 	
@@ -1141,7 +1177,7 @@ sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
 int
 mdnsAdvertiser(unsigned short mdnsEnabled, char * deviceServiceName, unsigned short deviceServiceNameLength)
 {
-	int ret;
+	char ret;
  	unsigned char *pTxBuffer, *pArgs;
 	
 	if (deviceServiceNameLength > MDNS_DEVICE_SERVICE_MAX_LENGTH)
