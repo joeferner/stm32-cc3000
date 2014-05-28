@@ -2,7 +2,7 @@
 #include "platform_config.h"
 #include "debug.h"
 #include <stm32f10x_usart.h>
-#include <stm32f10x_misc.h>
+#include <misc.h>
 
 #define TO_HEX(i) ( (((i) & 0xf) <= 9) ? ('0' + ((i) & 0xf)) : ('A' - 10 + ((i) & 0xf)) )
 

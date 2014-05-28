@@ -2,6 +2,6 @@
 
 mkdir -p build
 cd build
-rm stm32-ft312d-test.elf || echo "Cannot remove. stm32-ft312d-test.elf not build?"
-make stm32-ft312d-test.bin && \
-make stm32-ft312d-test.list
+rm stm32-cc3000.elf || echo "Cannot remove. stm32-cc3000.elf not build?"
+make stm32-cc3000.bin && \
+make stm32-cc3000.list

@@ -50,7 +50,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <avr/pgmspace.h>
 
 #ifdef __AVR__
   #include <avr/io.h>

@@ -5,7 +5,7 @@
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_exti.h>
 #include <stm32f10x_spi.h>
-#include <stm32f10x_misc.h>
+#include <misc.h>
 
 #include "cc3000-host-driver/wlan.h"
 #include "cc3000-host-driver/hci.h"
@@ -17,7 +17,7 @@
 #include "debug.h"
 #include "delay.h"
 #include "platform_config.h"
-#include "spi.h"
+#include "ccspi.h"
 
 // NOTE: Required by cc3000 Host driver
 unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
@@ -80,6 +80,7 @@ long cc3000_read_wlan_irq();
 void cc3000_wlan_irq_enable();
 void cc3000_wlan_irq_disable();
 void cc3000_write_wlan_pin(unsigned char val);
+void cc3k_int_poll();
 void cc3000_irq_poll();
 int cc3000_scan_ssids(uint32_t time);
 int cc3000_connect_open(const char *ssid);
@@ -375,6 +376,10 @@ void cc3000_write_wlan_pin(unsigned char val) {
   }
 }
 
+void cc3k_int_poll() {
+  cc3000_irq_poll();
+}
+
 void cc3000_irq_poll() {
   if (cc3000_read_wlan_irq() == 0 && cc3000_spi_is_in_irq == 0 && cc3000_spi_irq_enabled != 0) {
     cc3000_irq();
@@ -490,7 +495,7 @@ void cc3000_spi_write_data_sync(unsigned char *data, unsigned short size) {
 }
 
 void cc3000_irq() {
-  delay_us(10);
+  delay_us(10); // TODO do we need this?
   //  debug_write_line("cc3000_irq");
   //  debug_led_set(1);
   cc3000_spi_is_in_irq = 1;
@@ -595,7 +600,7 @@ long SpiWrite(unsigned char *pUserBuffer, unsigned short usLength) {
 
   // The magic number that resides at the end of the TX/RX buffer (1 byte after the allocated size)
   // for the purpose of overrun detection. If the magic number is overwritten - buffer overrun
-  // occurred - and we will be stuck here forever! 
+  // occurred - and we will be stuck here forever!
   if (wlan_tx_buffer[CC3000_TX_BUFFER_SIZE - 1] != CC3000_BUFFER_MAGIC_NUMBER) {
     debug_write_line("CC3000: Error - No magic number found in SpiWrite");
     while (1);
@@ -761,7 +766,7 @@ int cc3000_connect_open(const char *ssid) {
 
 #else
   return wlan_connect(ssid, ssidLen);
-#endif  
+#endif
 }
 
 int cc3000_connect_secure(const char *ssid, const char *key, int32_t secMode) {
@@ -814,7 +819,7 @@ int16_t connect_udp(uint32_t destIP, uint16_t destPort) {
   int16_t udpSocket;
 
   // Create the socket(s)
-  // socket   = SOCK_STREAM, SOCK_DGRAM, or SOCK_RAW 
+  // socket   = SOCK_STREAM, SOCK_DGRAM, or SOCK_RAW
   // protocol = IPPROTO_TCP, IPPROTO_UDP or IPPROTO_RAW
   udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
   if (udpSocket == -1) {
