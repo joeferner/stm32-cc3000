@@ -38,6 +38,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="cc3000-host-driver/cc3000_common.h" />
+		<Unit filename="cc3000-host-driver/debug.h" />
 		<Unit filename="cc3000-host-driver/evnt_handler.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -67,6 +68,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="cc3000-host-driver/wlan.h" />
+		<Unit filename="ccspi.h" />
 		<Unit filename="connection_info.h" />
 		<Unit filename="debug.c">
 			<Option compilerVar="CC" />
@@ -93,7 +95,6 @@
 		<Unit filename="ring_buffer.h" />
 		<Unit filename="run-cmake.sh" />
 		<Unit filename="run-doxygen.sh" />
-		<Unit filename="spi.h" />
 		<Unit filename="stm32_cc3000.c">
 			<Option compilerVar="CC" />
 		</Unit>

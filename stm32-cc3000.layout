@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="cc3000-host-driver/debug.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="192" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="platform_config.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1277" topLine="2" />
+		</Cursor>
+	</File>
+	<File name="cc3000-host-driver/wlan.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="21416" topLine="596" />
+		</Cursor>
+	</File>
+	<File name="stm32_cc3000.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7844" topLine="225" />
+		</Cursor>
+	</File>
+	<File name="main.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="connection_info.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="653" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="debug.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="88" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="cc3000-host-driver/netapp.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1572" topLine="24" />
+		</Cursor>
+	</File>
+	<File name="CMakeLists.txt" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2417" topLine="33" />
+		</Cursor>
+	</File>
+	<File name="interrupts.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="31" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="ccspi.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="233" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="cc3000-host-driver/netapp.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2300" topLine="21" />
+		</Cursor>
+	</File>
+	<File name="cc3000-host-driver/socket.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2569" topLine="42" />
+		</Cursor>
+	</File>
+	<File name="time.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="334" topLine="0" />
+		</Cursor>
+	</File>
+</CodeBlocks_layout_file>
